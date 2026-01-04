@@ -87,12 +87,29 @@ const baseUrl = endpoint.replace(/\/+$/, "") + API_PATH;
 </div>
 
 <script>
+  // Get or create a visitor ID for anonymous users
+  const VISITOR_KEY = "seriph_visitor_id";
+  function getVisitorId(): string {
+    let id = localStorage.getItem(VISITOR_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(VISITOR_KEY, id);
+    }
+    return id;
+  }
+
   document.querySelectorAll("[data-seriph-reactions]").forEach((container) => {
     const endpoint = (container as HTMLElement).dataset.endpoint;
     const siteKey = (container as HTMLElement).dataset.siteKey;
     const pageId = (container as HTMLElement).dataset.pageId;
 
     if (!endpoint || !siteKey || !pageId) return;
+
+    const visitorId = getVisitorId();
+    const headers = {
+      "X-Seriph-Key": siteKey,
+      "X-Seriph-Visitor": visitorId,
+    };
 
     // Track which reactions the user has made (stored in localStorage)
     const storageKey = `seriph-reactions-${pageId}`;
@@ -112,9 +129,7 @@ const baseUrl = endpoint.replace(/\/+$/, "") + API_PATH;
       try {
         const response = await fetch(
           `${endpoint}/reactions/${encodeURIComponent(pageId!)}`,
-          {
-            headers: { "X-Seriph-Key": siteKey! },
-          },
+          { headers },
         );
         if (!response.ok) return;
         const data = await response.json();
@@ -146,8 +161,8 @@ const baseUrl = endpoint.replace(/\/+$/, "") + API_PATH;
             {
               method: isReacted ? "DELETE" : "POST",
               headers: {
+                ...headers,
                 "Content-Type": "application/json",
-                "X-Seriph-Key": siteKey!,
               },
               body: JSON.stringify({ reactionType: type }),
             },

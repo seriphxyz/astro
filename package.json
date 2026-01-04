@@ -1,6 +1,6 @@
 {
   "name": "@seriphxyz/astro",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Astro components and content loader for Seriph widgets (forms, comments, reactions, posts)",
   "repository": {
     "type": "git",

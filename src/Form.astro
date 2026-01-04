@@ -66,6 +66,17 @@ const baseUrl = endpoint.replace(/\/+$/, "") + API_PATH;
     message: string;
   }
 
+  // Get or create a visitor ID for anonymous users
+  const VISITOR_KEY = "seriph_visitor_id";
+  function getVisitorId(): string {
+    let id = localStorage.getItem(VISITOR_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(VISITOR_KEY, id);
+    }
+    return id;
+  }
+
   // Store form load timestamps for spam detection
   const formTimestamps = new WeakMap<Element, number>();
 
@@ -121,6 +132,7 @@ const baseUrl = endpoint.replace(/\/+$/, "") + API_PATH;
           headers: {
             "Content-Type": "application/json",
             "X-Seriph-Key": siteKey,
+            "X-Seriph-Visitor": getVisitorId(),
           },
           body: JSON.stringify(data),
         });
